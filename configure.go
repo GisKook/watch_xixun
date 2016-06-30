@@ -1,4 +1,4 @@
-package shunt
+package watch_xixun
 
 import (
 	"encoding/json"
@@ -11,16 +11,20 @@ type ServerConfiguration struct {
 	ConnTimeout       uint8
 	ConnCheckInterval uint8
 	ServerStatistics  uint32
-	BindPort          uint32
+	BindPort          string
 }
 
-type UpConnectConfiguration struct {
-	DasHost string
+type DatabaseConfiguration struct {
+	Host   string
+	Port   string
+	User   string
+	Passwd string
+	Dbname string
 }
 
 type Configuration struct {
-	ServerConfig       *ServerConfiguration
-	UpConnectionConfig *UpConnectConfiguration
+	ServerConfig *ServerConfiguration
+	DBConfig     *DatabaseConfiguration
 }
 
 func ReadConfig(confpath string) (*Configuration, error) {
@@ -46,10 +50,6 @@ func (conf *Configuration) GetServerConnCheckInterval() uint8 {
 
 func (conf *Configuration) GetServerStatistics() uint32 {
 	return conf.ServerConfig.ServerStatistics
-}
-
-func (conf *Configuration) GetDasHost() string {
-	return conf.UpConnectionConfig.DasHost
 }
 
 var Config *Configuration

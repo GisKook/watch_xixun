@@ -1,4 +1,4 @@
-package shunt
+package watch_xixun
 
 import (
 	"sync/atomic"
@@ -10,24 +10,27 @@ type Conns struct {
 	index      uint32
 }
 
-var oneConns *Conns
+var connsInstance *Conns
 
 func NewConns() *Conns {
-	if oneConns == nil {
-		oneConns = &Conns{
+	if connsInstance == nil {
+		connsInstance = &Conns{
 			connsindex: make(map[uint32]*Conn),
 			connsuid:   make(map[uint64]uint32),
 			index:      0,
 		}
 	}
 
-	return oneConns
+	return connsInstance
 }
 
 func (cs *Conns) Add(conn *Conn) {
 	conn.index = atomic.AddUint32(&cs.index, 1)
 	cs.connsindex[conn.index] = conn
-	cs.connsuid[conn.IMEI] = conn.index
+}
+
+func (cs *Conns) SetID(gatewayid uint64, index uint32) {
+	cs.connsuid[gatewayid] = index
 }
 
 func (cs *Conns) GetConn(uid uint64) *Conn {
