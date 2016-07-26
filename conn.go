@@ -18,43 +18,39 @@ type ConnConfig struct {
 }
 
 type Conn struct {
-	conn                 *gotcp.Conn
-	config               *ConnConfig
-	recieveBuffer        *bytes.Buffer
-	ticker               *time.Ticker
-	readflag             int64
-	writeflag            int64
-	packetNsqReceiveChan chan gotcp.Packet
-	closeChan            chan bool
-	index                uint32
-	ID                   uint64
-	IMEI                 string
-	Status               uint8
-	ReadMore             bool
+	conn          *gotcp.Conn
+	config        *ConnConfig
+	recieveBuffer *bytes.Buffer
+	ticker        *time.Ticker
+	readflag      int64
+	writeflag     int64
+	closeChan     chan bool
+	index         uint32
+	ID            uint64
+	IMEI          string
+	Status        uint8
+	ReadMore      bool
 }
 
 func NewConn(conn *gotcp.Conn, config *ConnConfig) *Conn {
 	return &Conn{
-		conn:                 conn,
-		recieveBuffer:        bytes.NewBuffer([]byte{}),
-		config:               config,
-		readflag:             time.Now().Unix(),
-		writeflag:            time.Now().Unix(),
-		ticker:               time.NewTicker(time.Duration(config.ConnCheckInterval) * time.Second),
-		packetNsqReceiveChan: make(chan gotcp.Packet, config.NsqChanLimit),
-		closeChan:            make(chan bool),
-		index:                0,
-		Status:               ConnUnauth,
-		ReadMore:             true,
+		conn:          conn,
+		recieveBuffer: bytes.NewBuffer([]byte{}),
+		config:        config,
+		readflag:      time.Now().Unix(),
+		writeflag:     time.Now().Unix(),
+		ticker:        time.NewTicker(time.Duration(config.ConnCheckInterval) * time.Second),
+		closeChan:     make(chan bool),
+		index:         0,
+		Status:        ConnUnauth,
+		ReadMore:      true,
 	}
 }
 
 func (c *Conn) Close() {
-	NewConns().Remove(c.ID)
 	c.closeChan <- true
 	c.ticker.Stop()
 	c.recieveBuffer.Reset()
-	close(c.packetNsqReceiveChan)
 	close(c.closeChan)
 }
 
@@ -69,18 +65,13 @@ func (c *Conn) writeToclientLoop() {
 
 	for {
 		select {
-		case p := <-c.packetNsqReceiveChan:
-			if p != nil {
-				c.conn.GetRawConn().Write(p.Serialize())
-			}
 		case <-c.closeChan:
 			return
 		}
 	}
 }
 
-func (c *Conn) SendToGateway(p gotcp.Packet) {
-	//c.packetNsqReceiveChan <- p
+func (c *Conn) SendToClient(p gotcp.Packet) {
 	c.conn.AsyncWritePacket(p, time.Second)
 }
 
@@ -104,10 +95,6 @@ func (c *Conn) checkHeart() {
 			now = time.Now().Unix()
 			if now-c.readflag > int64(c.config.ReadLimit) {
 				log.Println("read linmit")
-				return
-			}
-			if now-c.writeflag > int64(c.config.WriteLimit) {
-				log.Println("write limit")
 				return
 			}
 			if c.Status == ConnUnauth {

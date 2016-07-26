@@ -1,7 +1,6 @@
 package protocol
 
 import (
-	"log"
 	"strconv"
 	"time"
 )
@@ -18,19 +17,15 @@ var sys = "23m4iy8hgvjteux5d7p9nzf6qabwcksr"
 func generateValiCode(imei string) string {
 	imeilen := len(imei)
 	start := imei[6]
-	log.Println(start)
 	mid := imei[7]
 	end := imei[8]
 	var code string
 	for i := 0; i < 6; i++ {
 		val := int((imei[i] + imei[imeilen-1-i] + start + end)) * int(mid) * (i + 1)
-		tmp, _ := strconv.Atoi(imei[0:10])
+		tmp, _ := strconv.Atoi(imei[10:])
 		result := 31*tmp + val
 		result = result % len(sys)
-		log.Println(sys[result])
-		ch := strconv.Itoa(int(sys[result]))
-
-		code += ch
+		code += string(sys[result])
 	}
 
 	return code

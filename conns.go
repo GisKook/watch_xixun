@@ -37,10 +37,9 @@ func (cs *Conns) GetConn(uid uint64) *Conn {
 	return cs.connsindex[cs.connsuid[uid]]
 }
 
-func (cs *Conns) Remove(uid uint64) {
-	index := cs.connsuid[uid]
-	delete(cs.connsindex, index)
-	delete(cs.connsuid, uid)
+func (cs *Conns) Remove(conn *Conn) {
+	delete(cs.connsindex, conn.index)
+	delete(cs.connsuid, conn.ID)
 }
 
 func (cs *Conns) Check(uid uint64) bool {

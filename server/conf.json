@@ -8,10 +8,10 @@
 		"BindPort":"10054"
 	},
 	"DBConfig":{
-		"Host":"192.168.2.21",
+		"Host":"192.168.2.143",
         "Port":"5432",
-        "User":"cetcnav",
-        "Passwd":"dkdh13579",
-        "Dbname":"lbs_industry_smart_elder_dev"
+        "User":"postgres",
+        "Passwd":"postgres",
+        "Dbname":"community"
 	}
 }

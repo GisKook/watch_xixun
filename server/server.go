@@ -33,13 +33,19 @@ func main() {
 	}
 	srv := gotcp.NewServer(config, &watch_xixun.Callback{}, &watch_xixun.ShaProtocol{})
 
+	// create db server
+	dbsrv, _ := watch_xixun.NewDbServer(configuration.DBConfig)
 	// create watch_xixun server
 	watch_xixunserverconfig := &watch_xixun.ServerConfig{
 		Listener:      listener,
 		AcceptTimeout: time.Duration(configuration.ServerConfig.ConnTimeout) * time.Second,
 	}
-	watch_xixunserver := watch_xixun.NewServer(srv, watch_xixunserverconfig)
+	watch_xixunserver := watch_xixun.NewServer(srv, watch_xixunserverconfig, dbsrv)
 	watch_xixun.SetServer(watch_xixunserver)
+	//create watch_data
+	watchdata := watch_xixun.NewWatchData(dbsrv)
+	go watchdata.Do()
+
 	// starts service
 	fmt.Println("listening:", listener.Addr())
 	watch_xixunserver.Start()

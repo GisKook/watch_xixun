@@ -17,6 +17,12 @@ func (this *ShaPacket) Serialize() []byte {
 		return this.Packet.(*protocol.LoginPacket).Serialize()
 	case protocol.HeartBeat:
 		return this.Packet.(*protocol.HeartPacket).Serialize()
+	case protocol.PosUp:
+		return this.Packet.(*protocol.PosUpPacket).Serialize()
+	case protocol.Echo:
+		return this.Packet.(*protocol.EchoPacket).Serialize()
+	case protocol.WarnUp:
+		return this.Packet.(*protocol.WarnUpPacket).Serialize()
 	}
 
 	return nil
@@ -52,6 +58,7 @@ func (this *ShaProtocol) ReadPacket(c *gotcp.Conn) (gotcp.Packet, error) {
 				return nil, gotcp.ErrConnClosing
 			}
 			buffer.Write(data[0:readLengh])
+			smconn.UpdateReadflag()
 		}
 
 		cmdid, pkglen := protocol.CheckProtocol(buffer)
@@ -60,14 +67,26 @@ func (this *ShaProtocol) ReadPacket(c *gotcp.Conn) (gotcp.Packet, error) {
 		buffer.Read(pkgbyte)
 		switch cmdid {
 		case protocol.Login:
-			log.Printf("<DEBUG> cmdid %d\n", cmdid)
 			pkg := protocol.ParseLogin(pkgbyte)
 			smconn.ReadMore = false
 			return NewShaPacket(protocol.Login, pkg), nil
 		case protocol.HeartBeat:
-			pkg := protocol.ParseHeart(pkgbyte, smconn.ID)
+			pkg := protocol.ParseHeart(pkgbyte)
 			smconn.ReadMore = false
 			return NewShaPacket(protocol.HeartBeat, pkg), nil
+
+		case protocol.PosUp:
+			pkg := protocol.ParsePosUp(pkgbyte)
+			smconn.ReadMore = false
+			return NewShaPacket(protocol.PosUp, pkg), nil
+		case protocol.Echo:
+			pkg := protocol.ParseEcho(pkgbyte)
+			smconn.ReadMore = false
+			return NewShaPacket(protocol.Echo, pkg), nil
+		case protocol.WarnUp:
+			pkg := protocol.ParseWarnUp(pkgbyte)
+			smconn.ReadMore = false
+			return NewShaPacket(protocol.WarnUp, pkg), nil
 
 		case protocol.Illegal:
 			smconn.ReadMore = true

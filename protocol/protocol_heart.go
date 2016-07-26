@@ -3,16 +3,15 @@ package protocol
 import ()
 
 type HeartPacket struct {
-	ID uint64
+	Content []byte
 }
 
 func (p *HeartPacket) Serialize() []byte {
-	var buf []byte
-	return buf
+	return p.Content
 }
 
-func ParseHeart(buffer []byte, gatewayid uint64) *HeartPacket {
+func ParseHeart(buffer []byte) *HeartPacket {
 	return &HeartPacket{
-		ID: gatewayid,
+		Content: buffer,
 	}
 }
