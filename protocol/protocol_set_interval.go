@@ -15,7 +15,7 @@ func (p *Set_Interval_Packet) Serialize() []byte {
 	result += SEP
 	result += p.SerialNumber
 	result += ",123456cmd,"
-	result += "ti=30"
+	result += "ti=5"
 	result += ENDFLAG
 
 	return []byte(result)

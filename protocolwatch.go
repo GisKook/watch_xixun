@@ -76,8 +76,11 @@ func (this *ShaProtocol) ReadPacket(c *gotcp.Conn) (gotcp.Packet, error) {
 			return NewShaPacket(protocol.HeartBeat, pkg), nil
 
 		case protocol.PosUp:
+
+			log.Println("posupdata")
 			pkg := protocol.ParsePosUp(pkgbyte)
 			smconn.ReadMore = false
+			log.Println("posupparsesuccess")
 			return NewShaPacket(protocol.PosUp, pkg), nil
 		case protocol.Echo:
 			pkg := protocol.ParseEcho(pkgbyte)

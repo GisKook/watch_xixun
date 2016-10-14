@@ -97,10 +97,10 @@ func (c *Conn) checkHeart() {
 				log.Println("read linmit")
 				return
 			}
-			if c.Status == ConnUnauth {
-				log.Printf("unauth's gateway gatewayid %x\n", c.ID)
-				return
-			}
+			//			if c.Status == ConnUnauth {
+			//				log.Printf("unauth's gateway gatewayid %x\n", c.ID)
+			//				return
+			//			}
 		case <-c.closeChan:
 			return
 		}

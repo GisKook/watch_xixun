@@ -52,31 +52,32 @@ func on_login(c *gotcp.Conn, p *ShaPacket) {
 }
 
 func on_posup(c *gotcp.Conn, p *ShaPacket) {
+	log.Println("posupin")
 	posup_pkg := p.Packet.(*protocol.PosUpPacket)
-	if posup_pkg.GPSFlag == "" {
+	if posup_pkg.WifiCount > 2 {
 		posup_pkg.LocationTime = time.Now().Format("060102150405")
-		sql := fmt.Sprintf("INSERT INTO t_posup_log(id,imme,location_time,glat,glong) VALUES (nextval('t_posup_id_seq'),'%s',to_timestamp('%s','YYMMDDhh24miss'),'%s','%s')",
-			posup_pkg.IMEI, posup_pkg.LocationTime, "36.6358895969", "101.7216090229")
+		sql := fmt.Sprintf("INSERT INTO t_posup_log(id, imme,location_time,datainfo,accesstype) VALUES ('%s',to_timestamp('%s','YYMMDDhh24miss'),'%s','%s')",
+			posup_pkg.IMEI, posup_pkg.LocationTime, posup_pkg.Wifi, 1)
 		log.Println("heihei", sql)
 		GetServer().Dbsrv.Insert(sql)
-	} else {
+		c.AsyncWritePacket(p, time.Second)
+	} else if posup_pkg.GPSFlag != "" {
 		c.AsyncWritePacket(p, time.Second)
 		log.Println("long", posup_pkg.Longitude)
 		if posup_pkg.Longitude != "" {
-
+			log.Println("-----tag 2")
 			posup_pkg.LocationTime = time.Now().Format("060102150405")
-			sql := fmt.Sprintf("INSERT INTO t_posup_log(id,imme,location_time,glat,glong) VALUES (nextval('t_posup_id_seq'),'%s',to_timestamp('%s','YYMMDDhh24miss'),'%s','%s')",
+			sql := fmt.Sprintf("INSERT INTO t_posup_log(imme,location_time,glat,glong) VALUES ('%s',to_timestamp('%s','YYMMDDhh24miss'),'%s','%s')",
 				posup_pkg.IMEI, posup_pkg.LocationTime, posup_pkg.Latitude, posup_pkg.Longitude)
 			log.Println(sql)
 			GetServer().Dbsrv.Insert(sql)
-			//	} else if strings.Contains(posup_pkg.IMEI, "2563") || strings.Contains(posup_pkg.IMEI, "2654") {
-		} else {
+		} else if posup_pkg.WifiCount > 2 {
+			log.Println("-----tag 3")
 			posup_pkg.LocationTime = time.Now().Format("060102150405")
-			sql := fmt.Sprintf("INSERT INTO t_posup_log(id,imme,location_time,glat,glong) VALUES (nextval('t_posup_id_seq'),'%s',to_timestamp('%s','YYMMDDhh24miss'),'%s','%s')",
-				posup_pkg.IMEI, posup_pkg.LocationTime, "36.6358895969", "101.7216090229")
+			sql := fmt.Sprintf("INSERT INTO t_posup_log(imme,location_time,datainfo,accesstype) VALUES ('%s',to_timestamp('%s','YYMMDDhh24miss'),'%s','%s')",
+				posup_pkg.IMEI, posup_pkg.LocationTime, posup_pkg.Wifi, 1)
 			log.Println("heihei", sql)
 			GetServer().Dbsrv.Insert(sql)
-
 		}
 	}
 }
@@ -85,7 +86,7 @@ func on_warnup(c *gotcp.Conn, p *ShaPacket) {
 	c.AsyncWritePacket(p, time.Second)
 
 	warnup_pkg := p.Packet.(*protocol.WarnUpPacket)
-	sql := fmt.Sprintf("INSERT INTO t_warnup_log(id,imme,warnstyle,warn_time) VALUES (nextval('t_posup_id_seq'),'%s','%s',to_timestamp('%s','YYMMDDhh24miss'))",
+	sql := fmt.Sprintf("INSERT INTO t_warnup_log(imme,warnstyle,warn_time) VALUES ('%s','%s',to_timestamp('%s','YYMMDDhh24miss'))",
 		warnup_pkg.IMEI, warnup_pkg.WarnStyle, time.Now().Format("060102150405"))
 	log.Println(sql)
 	GetServer().Dbsrv.Insert(sql)
@@ -99,6 +100,7 @@ func on_warnup(c *gotcp.Conn, p *ShaPacket) {
 
 func (this *Callback) OnMessage(c *gotcp.Conn, p gotcp.Packet) bool {
 	shaPacket := p.(*ShaPacket)
+	log.Println("onmessage packettype", shaPacket.Type)
 	switch shaPacket.Type {
 	case protocol.Login:
 		on_login(c, shaPacket)

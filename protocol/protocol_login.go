@@ -40,7 +40,7 @@ func (p *LoginPacket) Serialize() []byte {
 	result += ",123456cmd,"
 	result += "te="
 	t := time.Now()
-	timelogin := t.Format("060102-150405")
+	timelogin := t.Format("060102150405")
 	result += timelogin
 	result += SEP
 	result += generateValiCode(p.IMEI)

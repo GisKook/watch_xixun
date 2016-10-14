@@ -8,7 +8,7 @@
 		"BindPort":"10054"
 	},
 	"DBConfig":{
-		"Host":"192.168.2.143",
+		"Host":"192.168.2.144",
         "Port":"5432",
         "User":"postgres",
         "Passwd":"postgres",
